@@ -98,7 +98,7 @@ parse_commandline "$@"
 printf 'Value of --%s: %s\n' 'command' "$_arg_command"
 printf 'Value of --%s: %s\n' 'versionFileLocation' "$_arg_versionlocation"
 
-VERSION=$(git describe --tags --always)
+VERSION="$(git describe --tags --always)-SNAPSHOT"
 echo $VERSION > "$_arg_versionlocation"
 
 mvn versions:set -DnewVersion="$VERSION"
