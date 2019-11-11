@@ -4,6 +4,7 @@ import io.xstefank.client.VersionClient;
 import io.xstefank.model.VersionDefinition;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.bind.Jsonb;
@@ -19,6 +20,8 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class VersionUpdater {
+
+    private static final Logger log = Logger.getLogger(VersionUpdater.class);
     
     private Jsonb jsonb = JsonbBuilder.create();
 
@@ -47,12 +50,15 @@ public class VersionUpdater {
         ProcessBuilder processBuilder = new ProcessBuilder();
 
         String property = version.getProperty();
+        String versionString = getVersionString(version.getVersion());
+        log.infof("Replacing %s with %s", version.getProperty(), versionString);
+        
         String s = String.format("sed -i 's#<%s>\\([^<][^<]*\\)</%s>", property, property)
-            + String.format("#<%s>%s</%s>#' %s", property, getVersionString(version.getVersion()), property, pomXml.getAbsolutePath());
+            + String.format("#<%s>%s</%s>#' %s", property, versionString, property, pomXml.getAbsolutePath());
         processBuilder.command("bash", "-c", s);
 
         Process process = processBuilder.start();
-        int i = process.waitFor();
+        process.waitFor();
     }
 
     private String getVersionString(String versionURL) {
